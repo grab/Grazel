@@ -21,6 +21,9 @@ import com.grab.grazel.util.WORKSPACE
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -39,8 +42,8 @@ abstract class FormatBazelFileTask : DefaultTask() {
     @get:OutputFile
     var bazelFile: File = File(project.projectDir, BUILD_BAZEL)
 
-    @InputFile
-    val buildifierScript: File = File(project.rootProject.buildDir, "buildifier")
+    @get:InputFile
+    abstract val buildifierScript: RegularFileProperty
 
     init {
         outputs.upToDateWhen { false } // This task is supposed to run always until we figure out up-to-date checks
@@ -53,7 +56,9 @@ abstract class FormatBazelFileTask : DefaultTask() {
         if (bazelFile.exists()) {
             execOperations.exec {
                 commandLine = listOf(
-                    buildifierScript.path,
+                    "sh",
+                    "-c",
+                    buildifierScript.get().asFile.absolutePath,
                     bazelFile.absolutePath
                 )
             }
@@ -88,7 +93,8 @@ abstract class FormatBazelFileTask : DefaultTask() {
          */
         fun register(
             project: Project,
-            configureAction: Task.() -> Unit
+            buildifierScript: Provider<RegularFile>,
+            configureAction: FormatBazelFileTask.() -> Unit
         ): TaskProvider<out Task> {
             val rootProject = project.rootProject
             if (project == rootProject) {
@@ -98,22 +104,26 @@ abstract class FormatBazelFileTask : DefaultTask() {
                     description = "Format $WORKSPACE file"
 
                     configureAction(this)
+                    this.buildifierScript.set(buildifierScript)
                 }
                 // Format build.bazel
                 val formatBuildBazel = rootProject.register(FORMAT_BUILD_BAZEL_FILE_TASK) {
                     description = "Format $BUILD_BAZEL file"
 
                     configureAction(this)
+                    this.buildifierScript.set(buildifierScript)
                 }
                 // Aggregating task to depend on above
                 return rootProject.register(FORMAT_BAZEL_FILE_TASK) {
                     description = TASK_DESCRIPTION
                     dependsOn(formatWorkspace, formatBuildBazel)
+                    this.buildifierScript.set(buildifierScript)
                 }
             } else {
                 return project.register(FORMAT_BAZEL_FILE_TASK) {
                     description = TASK_DESCRIPTION
                     configureAction(this)
+                    this.buildifierScript.set(buildifierScript)
                 }
             }
         }

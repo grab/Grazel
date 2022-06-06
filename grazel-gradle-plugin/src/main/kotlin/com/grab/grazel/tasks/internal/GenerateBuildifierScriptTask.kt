@@ -17,39 +17,32 @@
 package com.grab.grazel.tasks.internal
 
 import com.grab.grazel.di.qualifiers.RootProject
+import com.grab.grazel.hybrid.bazelCommand
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
-import java.io.File
 
 abstract class GenerateBuildifierScriptTask : DefaultTask() {
 
     @get:OutputFile
-    val buildifierScript = File(project.rootProject.buildDir, "buildifier")
-
-    private val execOperations: ExecOperations = project.serviceOf()
+    abstract val buildifierScript: RegularFileProperty
 
     init {
-        // This task is supposed to run alawys as the generated buildifier script does not change
-        // even when buildifier version was changed.
-        // We are pushing the responsibility to bazel to determine if it is in fact up-to-date or not
-        outputs.upToDateWhen { false }
+        outputs.upToDateWhen { false } // This task is supposed to run always until we figure out up-to-date checks
     }
 
     @TaskAction
     fun action() {
-        execOperations.exec {
-            commandLine = listOf(
-                "bazelisk",
-                "run",
-                "@grab_bazel_common//:buildifier",
-                "--script_path=${buildifierScript.path}"
-            )
-        }
+        project.bazelCommand(
+            "run",
+            "@grab_bazel_common//:buildifier",
+            "--script_path=${buildifierScript.get().asFile.path}"
+        )
     }
 
     companion object {
@@ -63,6 +56,7 @@ abstract class GenerateBuildifierScriptTask : DefaultTask() {
         ) {
             description = "Generates buildifier executable script"
             group = GRAZEL_TASK_GROUP
+            buildifierScript.set(project.layout.buildDirectory.file("buildifier"))
 
             configureAction(this)
         }
