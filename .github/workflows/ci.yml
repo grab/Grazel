@@ -20,7 +20,7 @@ jobs:
             -   name: Lint
                 run: |
                     find "$(pwd -P)" -type f \
-                    ( -name "*.bazel" -o -name "WORKSPACE" ) \
+                    \( -name "*.bazel" -o -name "WORKSPACE" \) \
                     -not -path "./buildsystem/*" \
                     -exec bazelisk run //:buildifier -- --mode=check -v {} \\+ \
     build:
@@ -37,7 +37,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: "bazel-cache"
-                    key: bazel-common-build
+                    key: bazel-build
             -   name: Build
                 run: bazelisk build //...
     test:
@@ -54,6 +54,6 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: "bazel-cache"
-                    key: bazel-common-test
+                    key: bazel-test
             -   name: Test
                 run: bazelisk test //...
