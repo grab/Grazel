@@ -20,6 +20,10 @@ kt_db_android_library(
     ]) + glob([
         "src/flavor1/res/values/strings.xml",
     ]),
+    tags = [
+        "@direct//sample-lib-flavor1",
+        "@self//sample-android-flavor",
+    ],
     visibility = [
         "//visibility:public",
     ],

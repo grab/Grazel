@@ -5,6 +5,9 @@ kt_jvm_library(
     srcs = glob([
         "src/main/java/com/grab/grazel/sample/HelloWorld.kt",
     ]),
+    tags = [
+        "@self//sample-kotlin-lib",
+    ],
     visibility = [
         "//visibility:public",
     ],
@@ -19,6 +22,9 @@ grab_kt_jvm_test(
     ]),
     associates = [
         "//sample-kotlin-lib",
+    ],
+    tags = [
+        "@self//sample-kotlin-lib-test",
     ],
     visibility = [
         "//visibility:public",

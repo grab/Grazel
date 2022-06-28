@@ -5,6 +5,9 @@ kt_jvm_library(
     srcs = glob([
         "src/main/java/com/grab/grazel/android/flavor/ModuleName.kt",
     ]),
+    tags = [
+        "@self//sample-lib-flavor1",
+    ],
     visibility = [
         "//visibility:public",
     ],
@@ -19,6 +22,9 @@ grab_kt_jvm_test(
     ]),
     associates = [
         "//sample-lib-flavor1",
+    ],
+    tags = [
+        "@self//sample-lib-flavor1-test",
     ],
     visibility = [
         "//visibility:public",

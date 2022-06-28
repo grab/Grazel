@@ -156,6 +156,7 @@ grazel {
                 languageVersion = "1.6"
                 jvmTarget = "11"
             }
+            enabledTransitiveReduction = true
         }
         dagger {
             tag = "2.37"

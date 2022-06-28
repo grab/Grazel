@@ -14,6 +14,9 @@ kt_android_library(
     ]),
     custom_package = "com.grab.grazel.android.sample.lib",
     manifest = "src/main/AndroidManifest.xml",
+    tags = [
+        "@self//sample-android-lib",
+    ],
     visibility = [
         "//visibility:public",
     ],
@@ -38,6 +41,10 @@ grab_android_local_test(
     resources = glob([
         "src/test/resources/**",
     ]),
+    tags = [
+        "@direct//sample-android-lib",
+        "@self//sample-android-lib-test",
+    ],
     visibility = [
         "//visibility:public",
     ],
